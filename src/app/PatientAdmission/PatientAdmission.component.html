@@ -1,0 +1,56 @@
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-end">
+    <!-- <h5><i class="fas fa-hospital-user"></i> {{ 'Patient Admissions' | localize }}</h5> -->
+    <button class="btn btn-primary" (click)="createPatient()">
+      <i class="fas fa-plus">
+
+      </i> {{ 'Create Admission' | localize }}
+    </button>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ 'Patient' | localize }}</th>
+            <th>{{ 'Doctor' | localize }}</th>
+            <th>{{'Room' | localize}}</th>
+            <th>{{ 'BedNumber' | localize }}</th>
+            <th>{{ 'Admission Date' | localize }}</th>
+            <th>{{ 'Discharge Date' | localize }}</th>
+            <th>{{ 'Diagnosis' | localize }}</th>
+            <th>{{ 'Status' | localize }}</th>
+            <th width="180">{{ 'Actions' | localize }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of patients; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ p.firstName }}</td>
+            <td>{{ p.fullName }}</td>
+            <td>{{p.bedType}}</td>
+            <td>{{ p.bedNumber  }}</td>
+            <td>{{ p.admissionDate | date:'dd/MM/yyyy' }}</td>
+            <td>{{ p.dischargeDate ? (p.dischargeDate | date:'dd/MM/yyyy') : '-' }}</td>
+            <td>{{ p.diagnosis }}</td>
+            <td>{{ p.status }}</td>
+            <td>
+              <button class="btn btn-sm btn-info mr-1" (click)="editPatient(p)">
+                <!-- <i class="fas fa-edit"></i> {{ 'Edit' | localize }} -->
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deletePatient(p)">
+                <!-- <i class="fas fa-trash"></i> {{ 'Delete' | localize }} -->
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="patients?.length === 0">
+            <td colspan="9" class="text-center text-muted">{{ 'No data found' | localize }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

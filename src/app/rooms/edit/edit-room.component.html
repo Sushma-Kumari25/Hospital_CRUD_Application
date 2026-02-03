@@ -1,0 +1,93 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #editRoomForm="ngForm"
+  (ngSubmit)="save()">
+
+  <abp-modal-header
+    [title]="'Edit Room' | localize"
+    (onCloseClick)="bsModalRef.hide()">
+  </abp-modal-header>
+
+  <div class="modal-body">
+
+    <!-- Room Number -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">
+        Room Number
+      </label>
+      <div class="col-md-9">
+        <input
+          type="text"
+          class="form-control"
+          name="roomNumber"
+          required
+          placeholder="Enter Room Number --"
+          [(ngModel)]="room.roomNumber"
+          #roomModel="ngModel"
+          #roomEl />
+
+        <abp-validation-summary
+          [control]="roomModel"
+          [controlEl]="roomEl">
+        </abp-validation-summary>
+      </div>
+    </div>
+
+    <!-- Bed Type -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">
+        Bed Type
+      </label>
+      <div class="col-md-9">
+        <select
+          class="form-control"
+          name="bedType"
+          required
+          [(ngModel)]="room.bedType"
+          #bedModel="ngModel"
+          #bedEl>
+
+          <option value="">-- Select Bed Type --</option>
+          <option [value]="1">ICU</option>
+          <option [value]="2">General Ward</option>
+          <option [value]="3">Private Room</option>
+        </select>
+
+        <abp-validation-summary
+          [control]="bedModel"
+          [controlEl]="bedEl">
+        </abp-validation-summary>
+      </div>
+    </div>
+
+    <!-- Availability -->
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label">
+        Availability
+      </label>
+      <div class="col-md-9">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            [(ngModel)]="room.isActive"
+            name="isActive"
+            id="isActive" />
+          <label class="form-check-label" for="isActive">
+            Available
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Footer -->
+  <abp-modal-footer
+    [cancelDisabled]="saving"
+    [saveDisabled]="!editRoomForm.form.valid || saving"
+    (onCancelClick)="bsModalRef.hide()">
+  </abp-modal-footer>
+
+</form>

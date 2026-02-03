@@ -1,0 +1,128 @@
+<form
+  class="form-horizontal"
+  autocomplete="off"
+  #form="ngForm"
+  (ngSubmit)="save()">
+
+  <abp-modal-header
+    [title]="'Create Patient Admission' | localize"
+    (onCloseClick)="bsModalRef.hide()">
+  </abp-modal-header>
+
+  <div class="modal-body">
+
+    <!-- Patient -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">Patient</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                name="patientId"
+                required
+                [(ngModel)]="Pa.patientId">
+          <option value="">-- Select Patient --</option>
+          <option *ngFor="let p of patientList" [ngValue]="p.value">
+            {{ p.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Doctor -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">Doctor</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                name="doctorId"
+                required
+                [(ngModel)]="Pa.doctorId">
+          <option value="">-- Select Doctor --</option>
+          <option *ngFor="let d of doctorList" [ngValue]="d.value">
+            {{ d.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bed -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">Bed</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                name="bedId"
+                required
+                [(ngModel)]="Pa.bedId">
+          <option value="">-- Select Bed --</option>
+          <option *ngFor="let b of bedList" [ngValue]="b.value">
+            {{ b.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Admission Date -->
+<div class="form-group row required">
+  <label class="col-md-3 col-form-label">Admission Date</label>
+  <div class="col-md-9">
+    <input
+      type="date"
+      class="form-control"
+      name="admissionDate"
+      required
+      [(ngModel)]="Pa.admissionDate">
+  </div>
+</div>
+
+
+
+   <!-- Discharge Date -->
+<div class="form-group row">
+  <label class="col-md-3 col-form-label">Discharge Date</label>
+  <div class="col-md-9">
+    <input
+      type="date"
+      class="form-control"
+      name="dischargeDate"
+      [(ngModel)]="Pa.dischargeDate">
+  </div>
+</div>
+
+
+
+    <!-- Diagnosis -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">Diagnosis</label>
+      <div class="col-md-9">
+        <textarea
+          class="form-control"
+          rows="3"
+          name="diagnosis"
+          required
+          [(ngModel)]="Pa.diagnosis"></textarea>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group row required">
+      <label class="col-md-3 col-form-label">Status</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                name="status"
+                required
+                [(ngModel)]="Pa.status">
+          <option value="">-- Select Status --</option>
+          <option [ngValue]="1">Admitted</option>
+          <option [ngValue]="2">Discharged</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+  <abp-modal-footer
+    [saveDisabled]="!form.valid || saving"
+    [cancelDisabled]="saving"
+    (onSaveClick)="save()"
+    (onCancelClick)="bsModalRef.hide()">
+  </abp-modal-footer>
+
+</form>

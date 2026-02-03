@@ -1,0 +1,76 @@
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h5 class="mb-0">
+          {{ 'Doctors' | localize }}
+        </h5>
+      </div>
+
+      <div class="col-md-6 text-right">
+        <button class="btn btn-primary" (click)="createDoctor()">
+          {{ 'Create Doctor' | localize }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered table-hover">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ 'Doctor Code' | localize }}</th>
+            <th>{{ 'Full Name' | localize }}</th>
+            <th>{{ 'Qualification' | localize }}</th>
+            <th>{{ 'Phone' | localize }}</th>
+            <th>{{ 'Email' | localize }}</th>
+            <th>{{ 'Available' | localize }}</th>
+            <th width="180">{{ 'Actions' | localize }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let d of doctors; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ d.doctorCode }}</td>
+            <td>{{ d.fullName }}</td>
+            <td>{{ d.qualification }}</td>
+            <td>{{ d.phoneNumber }}</td>
+            <td>{{ d.email }}</td>
+            <td>
+              <span class="badge badge-success" *ngIf="d.isAvailable">Available</span>
+              <span class="badge badge-danger" *ngIf="!d.isAvailable">Not Available</span>
+            </td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-info mr-1" (click)="editDoctor(d)">
+                {{ 'Edit' | localize }}
+              </button>
+
+              <button class="btn btn-sm btn-danger" (click)="deleteDoctor(d)">
+                <i class="fas fa-trash"></i> {{ 'Delete' | localize }}
+              </button>
+            </td>
+          </tr>
+
+          <!-- No Data -->
+          <tr *ngIf="doctors?.length === 0">
+            <td colspan="8" class="text-center text-muted">
+              {{ 'No data found' | localize }}
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>

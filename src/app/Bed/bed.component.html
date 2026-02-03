@@ -1,0 +1,75 @@
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h5 class="mb-0">
+          {{ 'Beds' | localize }}
+        </h5>
+      </div>
+
+      <div class="col-md-6 text-right">
+        <button class="btn btn-primary" (click)="createBed()">
+          {{ 'Create Bed' | localize }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered table-hover">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ 'Room' | localize }}</th>
+            <th>{{ 'Bed Number' | localize }}</th>
+            <th>{{ 'Status' | localize }}</th>
+            <th width="180">{{ 'Actions' | localize }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let b of beds; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ b.roomId }}</td>
+            <td>{{ b.bedNumber }}</td>
+
+            <td>
+              <span class="badge badge-danger" *ngIf="b.isOccupied">
+                {{ 'Occupied' | localize }}
+              </span>
+              <span class="badge badge-success" *ngIf="!b.isOccupied">
+                {{ 'Available' | localize }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              <button class="btn btn-sm btn-info mr-1" (click)="editBed(b)">
+                {{ 'Edit' | localize }}
+              </button>
+
+              <button class="btn btn-sm btn-danger" (click)="deleteBed(b)">
+                {{ 'Delete' | localize }}
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="beds?.length === 0">
+            <td colspan="5" class="text-center text-muted">
+              {{ 'No data found' | localize }}
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>

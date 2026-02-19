@@ -6,7 +6,8 @@ import { PatientAdmissionComponent } from './PatientAdmission.component';
 const routes: Routes = [
   {
     path: '',
-    component: PatientAdmissionComponent
+    component: PatientAdmissionComponent,
+    
   }
 ];
 

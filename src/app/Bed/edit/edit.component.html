@@ -1,7 +1,8 @@
 <form #bedForm="ngForm" (ngSubmit)="save()" autocomplete="off">
 
+  <!-- Modal Header -->
   <abp-modal-header
-    [title]="'Create Bed' | localize"
+    [title]="'Edit Bed' | localize"
     (onCloseClick)="bsModalRef.hide()">
   </abp-modal-header>
 
@@ -9,17 +10,19 @@
 
     <!-- Room Dropdown -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">Room</label>
+      <label for="roomId" class="col-md-3 col-form-label">Room</label>
       <div class="col-md-9">
         <select
+          id="roomId"
           class="form-control"
           name="roomId"
           required
           [(ngModel)]="bed.roomId"
+          [ngModelOptions]="{updateOn: 'blur'}"
           #roomModel="ngModel"
           #roomEl>
-          <option value="">-- Select Room --</option>
-          <option *ngFor="let room of rooms" [value]="room.id">
+          <option [ngValue]="null">-- Select Room --</option>
+          <option *ngFor="let room of rooms" [ngValue]="room.id">
             {{ room.roomNumber }}
           </option>
         </select>
@@ -33,13 +36,15 @@
 
     <!-- Bed Number -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">Bed Number</label>
+      <label for="bedNumber" class="col-md-3 col-form-label">Bed Number</label>
       <div class="col-md-9">
         <input
+          id="bedNumber"
           class="form-control"
           name="bedNumber"
           required
           [(ngModel)]="bed.bedNumber"
+          [ngModelOptions]="{updateOn: 'blur'}"
           #bedModel="ngModel"
           #bedEl />
 
@@ -52,9 +57,10 @@
 
     <!-- Is Occupied -->
     <div class="form-group row">
-      <label class="col-md-3 col-form-label">Occupied</label>
+      <label for="isOccupied" class="col-md-3 col-form-label">Occupied</label>
       <div class="col-md-9">
         <input
+          id="isOccupied"
           type="checkbox"
           [(ngModel)]="bed.isOccupied"
           name="isOccupied" />
@@ -63,6 +69,7 @@
 
   </div>
 
+  <!-- Modal Footer -->
   <abp-modal-footer
     [saveDisabled]="!bedForm.form.valid || saving"
     [cancelDisabled]="saving"

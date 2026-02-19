@@ -9,6 +9,7 @@ import { AbpValidationSummaryComponent } from '../../shared/components/validatio
 import { LocalizePipe } from '../../shared/pipes/localize.pipe';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { PatientAdmissionComponent } from './PatientAdmission.component';
+import { EditPatientComponent } from '@app/Patients/edit/edit.component';
 
 const routes: Routes = [
   { path: '', component: PatientAdmissionComponent },
@@ -25,7 +26,8 @@ const routes: Routes = [
     AbpModalFooterComponent,
     AbpValidationSummaryComponent,
     LocalizePipe,
-    PatientAdmissionComponent
+    PatientAdmissionComponent,
+    
   ],
 })
 export class PatientAdmissionModule { }

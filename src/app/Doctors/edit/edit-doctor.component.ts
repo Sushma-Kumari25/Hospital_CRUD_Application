@@ -1,5 +1,4 @@
-import { Component, Injector, OnInit, EventEmitter, output, NgModule } from '@angular/core';
-
+import { Component, Injector, OnInit, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { AppComponentBase } from '../../../shared/app-component-base';
 import { DoctorsDto, DoctorsServiceProxy } from '../../../shared/service-proxies/service-proxies';
@@ -9,10 +8,10 @@ import { CommonModule } from '@angular/common';
 import { LocalizePipe } from "../../../shared/pipes/localize.pipe";
 import { AbpValidationSummaryComponent } from "../../../shared/components/validation/abp-validation.summary.component";
 import { FormsModule } from '@angular/forms';
-
+import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-create-doctor',
+  selector: 'app-edit-doctor',
   templateUrl: './edit-doctor.component.html',
   standalone: true,
   imports: [
@@ -22,43 +21,78 @@ import { FormsModule } from '@angular/forms';
     AbpValidationSummaryComponent,
     AbpModalHeaderComponent,
     LocalizePipe
-]
+  ]
 })
 export class EditDoctorComponent extends AppComponentBase implements OnInit {
 
+  saving = false;
+  id!: number;
+  doctor: DoctorsDto = new DoctorsDto();
 
-saving = false;
-id!: number;
-doctor: DoctorsDto = new DoctorsDto();
+  photo1: File | null = null;
+  photo2: File | null = null;
 
+  @Output() onSave = new EventEmitter<any>();
 
-onSave = output<EventEmitter<any>>();
+  constructor(
+    injector: Injector,
+    private http: HttpClient,
+    private _doctorsService: DoctorsServiceProxy,
+    public bsModalRef: BsModalRef,
+    private cd: ChangeDetectorRef
+  ) {
+    super(injector);
+  }
 
+  ngOnInit(): void {
+    if (!this.id) return;
 
-constructor(
-injector: Injector,
-private _doctorsService: DoctorsServiceProxy,
-public bsModalRef: BsModalRef
-) {
-super(injector);
-}
+    this._doctorsService.getDoctorById(this.id).subscribe(res => {
+      this.doctor = res;
+      this.cd.detectChanges();   // ⭐ fixes NG0100
+    });
+  }
 
+  // ⭐ FILE CHANGE
+  onFileChange(event: any, photoNumber: number) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-ngOnInit(): void {
-this._doctorsService.getDoctorById(this.id).subscribe(res => {
-this.doctor = res;
-});
-}
+    if (photoNumber === 1) this.photo1 = file;
+    else this.photo2 = file;
+  }
 
+  // 🚀 SAVE
+  save(): void {
 
-save(): void {
-this.saving = true;
+    this.saving = true;
 
+    const formData = new FormData();
 
-this._doctorsService.updateDoctor(this.doctor).subscribe(() => {
-this.notify.success('Doctor updated successfully');
-this.onSave.emit(null);
-this.bsModalRef.hide();
-});
-}
+    formData.append('Id', this.doctor.id.toString());
+    formData.append('DoctorCode', this.doctor.doctorCode);
+    formData.append('FullName', this.doctor.fullName);
+    formData.append('Qualification', this.doctor.qualification);
+    formData.append('PhoneNumber', this.doctor.phoneNumber);
+    formData.append('Email', this.doctor.email);
+    formData.append('IsAvailable', String(this.doctor.isAvailable));
+
+    if (this.photo1) formData.append('Photo1', this.photo1);
+    if (this.photo2) formData.append('Photo2', this.photo2);
+
+    // ⭐ USE PUT FOR UPDATE
+    this.http.put(
+      '/api/services/app/Doctors/UpdateDoctor',
+      formData
+    ).subscribe(() => {
+
+      this.notify.success('Doctor updated successfully');
+      this.onSave.emit(null);
+      this.bsModalRef.hide();
+      this.saving = false;
+
+    }, () => {
+      this.saving = false;
+    });
+  }
 }

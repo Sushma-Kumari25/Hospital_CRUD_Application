@@ -211,6 +211,62 @@ export class BedServiceProxy {
     }
 
     /**
+     * @param id (optional) 
+     * @return OK
+     */
+    getById(id: number | undefined): Observable<BedDto> {
+        let url_ = this.baseUrl + "/api/services/app/Bed/GetById?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BedDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BedDto>;
+        }));
+    }
+
+    protected processGetById(response: HttpResponseBase): Observable<BedDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BedDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param body (optional) 
      * @return OK
      */
@@ -575,7 +631,7 @@ export class DoctorsServiceProxy {
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -623,21 +679,59 @@ export class DoctorsServiceProxy {
     }
 
     /**
-     * @param body (optional) 
+     * @param doctorCode (optional) 
+     * @param fullName (optional) 
+     * @param qualification (optional) 
+     * @param phoneNumber (optional) 
+     * @param email (optional) 
+     * @param isAvailable (optional) 
+     * @param photo1 (optional) 
+     * @param photo2 (optional) 
      * @return OK
      */
-    createDoctor(body: CreateDoctorsDto | undefined): Observable<DoctorsDto> {
+    createDoctor(doctorCode: string | undefined, fullName: string | undefined, qualification: string | undefined, phoneNumber: string | undefined, email: string | undefined, isAvailable: boolean | undefined, photo1: FileParameter | undefined, photo2: FileParameter | undefined): Observable<DoctorsDto> {
         let url_ = this.baseUrl + "/api/services/app/Doctors/CreateDoctor";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (doctorCode === null || doctorCode === undefined)
+            throw new Error("The parameter 'doctorCode' cannot be null.");
+        else
+            content_.append("DoctorCode", doctorCode.toString());
+        if (fullName === null || fullName === undefined)
+            throw new Error("The parameter 'fullName' cannot be null.");
+        else
+            content_.append("FullName", fullName.toString());
+        if (qualification === null || qualification === undefined)
+            throw new Error("The parameter 'qualification' cannot be null.");
+        else
+            content_.append("Qualification", qualification.toString());
+        if (phoneNumber === null || phoneNumber === undefined)
+            throw new Error("The parameter 'phoneNumber' cannot be null.");
+        else
+            content_.append("PhoneNumber", phoneNumber.toString());
+        if (email === null || email === undefined)
+            throw new Error("The parameter 'email' cannot be null.");
+        else
+            content_.append("Email", email.toString());
+        if (isAvailable === null || isAvailable === undefined)
+            throw new Error("The parameter 'isAvailable' cannot be null.");
+        else
+            content_.append("IsAvailable", isAvailable.toString());
+        if (photo1 === null || photo1 === undefined)
+            throw new Error("The parameter 'photo1' cannot be null.");
+        else
+            content_.append("Photo1", photo1.data, photo1.fileName ? photo1.fileName : "Photo1");
+        if (photo2 === null || photo2 === undefined)
+            throw new Error("The parameter 'photo2' cannot be null.");
+        else
+            content_.append("Photo2", photo2.data, photo2.fileName ? photo2.fileName : "Photo2");
 
         let options_ : any = {
             body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             })
         };
@@ -679,21 +773,64 @@ export class DoctorsServiceProxy {
     }
 
     /**
-     * @param body (optional) 
+     * @param id (optional) 
+     * @param doctorCode (optional) 
+     * @param fullName (optional) 
+     * @param qualification (optional) 
+     * @param phoneNumber (optional) 
+     * @param email (optional) 
+     * @param isAvailable (optional) 
+     * @param photo1 (optional) 
+     * @param photo2 (optional) 
      * @return OK
      */
-    updateDoctor(body: UpdateDoctorsDto | undefined): Observable<DoctorsDto> {
+    updateDoctor(id: number | undefined, doctorCode: string | undefined, fullName: string | undefined, qualification: string | undefined, phoneNumber: string | undefined, email: string | undefined, isAvailable: boolean | undefined, photo1: FileParameter | undefined, photo2: FileParameter | undefined): Observable<DoctorsDto> {
         let url_ = this.baseUrl + "/api/services/app/Doctors/UpdateDoctor";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (doctorCode === null || doctorCode === undefined)
+            throw new Error("The parameter 'doctorCode' cannot be null.");
+        else
+            content_.append("DoctorCode", doctorCode.toString());
+        if (fullName === null || fullName === undefined)
+            throw new Error("The parameter 'fullName' cannot be null.");
+        else
+            content_.append("FullName", fullName.toString());
+        if (qualification === null || qualification === undefined)
+            throw new Error("The parameter 'qualification' cannot be null.");
+        else
+            content_.append("Qualification", qualification.toString());
+        if (phoneNumber === null || phoneNumber === undefined)
+            throw new Error("The parameter 'phoneNumber' cannot be null.");
+        else
+            content_.append("PhoneNumber", phoneNumber.toString());
+        if (email === null || email === undefined)
+            throw new Error("The parameter 'email' cannot be null.");
+        else
+            content_.append("Email", email.toString());
+        if (isAvailable === null || isAvailable === undefined)
+            throw new Error("The parameter 'isAvailable' cannot be null.");
+        else
+            content_.append("IsAvailable", isAvailable.toString());
+        if (photo1 === null || photo1 === undefined)
+            throw new Error("The parameter 'photo1' cannot be null.");
+        else
+            content_.append("Photo1", photo1.data, photo1.fileName ? photo1.fileName : "Photo1");
+        if (photo2 === null || photo2 === undefined)
+            throw new Error("The parameter 'photo2' cannot be null.");
+        else
+            content_.append("Photo2", photo2.data, photo2.fileName ? photo2.fileName : "Photo2");
 
         let options_ : any = {
             body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             })
         };
@@ -743,7 +880,7 @@ export class DoctorsServiceProxy {
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1251,6 +1388,62 @@ export class PatientAdmissionServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: number | undefined): Observable<PatientAdmissionDto> {
+        let url_ = this.baseUrl + "/api/services/app/PatientAdmission/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PatientAdmissionDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PatientAdmissionDto>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<PatientAdmissionDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PatientAdmissionDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -1331,7 +1524,7 @@ export class PatientsServiceProxy {
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1379,21 +1572,64 @@ export class PatientsServiceProxy {
     }
 
     /**
-     * @param body (optional) 
+     * @param patientCode (optional) 
+     * @param firstName (optional) 
+     * @param lastName (optional) 
+     * @param dateOfBirth (optional) 
+     * @param gender (optional) 
+     * @param phoneNumber (optional) 
+     * @param email (optional) 
+     * @param address (optional) 
+     * @param photo (optional) 
      * @return OK
      */
-    createPatient(body: CreatePatientsDto | undefined): Observable<PatientsDto> {
+    createPatient(patientCode: string | undefined, firstName: string | undefined, lastName: string | undefined, dateOfBirth: moment.Moment | undefined, gender: PatientEnum | undefined, phoneNumber: string | undefined, email: string | undefined, address: string | undefined, photo: FileParameter | undefined): Observable<PatientsDto> {
         let url_ = this.baseUrl + "/api/services/app/Patients/CreatePatient";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (patientCode === null || patientCode === undefined)
+            throw new Error("The parameter 'patientCode' cannot be null.");
+        else
+            content_.append("PatientCode", patientCode.toString());
+        if (firstName === null || firstName === undefined)
+            throw new Error("The parameter 'firstName' cannot be null.");
+        else
+            content_.append("FirstName", firstName.toString());
+        if (lastName === null || lastName === undefined)
+            throw new Error("The parameter 'lastName' cannot be null.");
+        else
+            content_.append("LastName", lastName.toString());
+        if (dateOfBirth === null || dateOfBirth === undefined)
+            throw new Error("The parameter 'dateOfBirth' cannot be null.");
+        else
+            content_.append("DateOfBirth", dateOfBirth.toJSON());
+        if (gender === null || gender === undefined)
+            throw new Error("The parameter 'gender' cannot be null.");
+        else
+            content_.append("Gender", gender.toString());
+        if (phoneNumber === null || phoneNumber === undefined)
+            throw new Error("The parameter 'phoneNumber' cannot be null.");
+        else
+            content_.append("PhoneNumber", phoneNumber.toString());
+        if (email === null || email === undefined)
+            throw new Error("The parameter 'email' cannot be null.");
+        else
+            content_.append("Email", email.toString());
+        if (address === null || address === undefined)
+            throw new Error("The parameter 'address' cannot be null.");
+        else
+            content_.append("Address", address.toString());
+        if (photo === null || photo === undefined)
+            throw new Error("The parameter 'photo' cannot be null.");
+        else
+            content_.append("Photo", photo.data, photo.fileName ? photo.fileName : "Photo");
 
         let options_ : any = {
             body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             })
         };
@@ -1435,21 +1671,69 @@ export class PatientsServiceProxy {
     }
 
     /**
-     * @param body (optional) 
+     * @param id (optional) 
+     * @param patientCode (optional) 
+     * @param firstName (optional) 
+     * @param lastName (optional) 
+     * @param dateOfBirth (optional) 
+     * @param gender (optional) 
+     * @param phoneNumber (optional) 
+     * @param email (optional) 
+     * @param address (optional) 
+     * @param photo (optional) 
      * @return OK
      */
-    updatePatient(body: UpdatePatientsDto | undefined): Observable<PatientsDto> {
+    updatePatient(id: number | undefined, patientCode: string | undefined, firstName: string | undefined, lastName: string | undefined, dateOfBirth: moment.Moment | undefined, gender: PatientEnum | undefined, phoneNumber: string | undefined, email: string | undefined, address: string | undefined, photo: FileParameter | undefined): Observable<PatientsDto> {
         let url_ = this.baseUrl + "/api/services/app/Patients/UpdatePatient";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (id === null || id === undefined)
+            throw new Error("The parameter 'id' cannot be null.");
+        else
+            content_.append("Id", id.toString());
+        if (patientCode === null || patientCode === undefined)
+            throw new Error("The parameter 'patientCode' cannot be null.");
+        else
+            content_.append("PatientCode", patientCode.toString());
+        if (firstName === null || firstName === undefined)
+            throw new Error("The parameter 'firstName' cannot be null.");
+        else
+            content_.append("FirstName", firstName.toString());
+        if (lastName === null || lastName === undefined)
+            throw new Error("The parameter 'lastName' cannot be null.");
+        else
+            content_.append("LastName", lastName.toString());
+        if (dateOfBirth === null || dateOfBirth === undefined)
+            throw new Error("The parameter 'dateOfBirth' cannot be null.");
+        else
+            content_.append("DateOfBirth", dateOfBirth.toJSON());
+        if (gender === null || gender === undefined)
+            throw new Error("The parameter 'gender' cannot be null.");
+        else
+            content_.append("Gender", gender.toString());
+        if (phoneNumber === null || phoneNumber === undefined)
+            throw new Error("The parameter 'phoneNumber' cannot be null.");
+        else
+            content_.append("PhoneNumber", phoneNumber.toString());
+        if (email === null || email === undefined)
+            throw new Error("The parameter 'email' cannot be null.");
+        else
+            content_.append("Email", email.toString());
+        if (address === null || address === undefined)
+            throw new Error("The parameter 'address' cannot be null.");
+        else
+            content_.append("Address", address.toString());
+        if (photo === null || photo === undefined)
+            throw new Error("The parameter 'photo' cannot be null.");
+        else
+            content_.append("Photo", photo.data, photo.fileName ? photo.fileName : "Photo");
 
         let options_ : any = {
             body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             })
         };
@@ -1499,7 +1783,7 @@ export class PatientsServiceProxy {
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
-            url_ += "Id=" + encodeURIComponent("" + id) + "&";
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -3786,69 +4070,6 @@ export interface ICreateBedDto {
     isOccupied: boolean;
 }
 
-export class CreateDoctorsDto implements ICreateDoctorsDto {
-    doctorCode: string | undefined;
-    fullName: string | undefined;
-    qualification: string | undefined;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    isAvailable: boolean;
-
-    constructor(data?: ICreateDoctorsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.doctorCode = _data["doctorCode"];
-            this.fullName = _data["fullName"];
-            this.qualification = _data["qualification"];
-            this.phoneNumber = _data["phoneNumber"];
-            this.email = _data["email"];
-            this.isAvailable = _data["isAvailable"];
-        }
-    }
-
-    static fromJS(data: any): CreateDoctorsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreateDoctorsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["doctorCode"] = this.doctorCode;
-        data["fullName"] = this.fullName;
-        data["qualification"] = this.qualification;
-        data["phoneNumber"] = this.phoneNumber;
-        data["email"] = this.email;
-        data["isAvailable"] = this.isAvailable;
-        return data;
-    }
-
-    clone(): CreateDoctorsDto {
-        const json = this.toJSON();
-        let result = new CreateDoctorsDto();
-        result.init(json);
-        return result;
-    }
-}
-
-export interface ICreateDoctorsDto {
-    doctorCode: string | undefined;
-    fullName: string | undefined;
-    qualification: string | undefined;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    isAvailable: boolean;
-}
-
 export class CreatePatientAdmissionDto implements ICreatePatientAdmissionDto {
     patientId: number;
     doctorId: number;
@@ -3914,81 +4135,6 @@ export interface ICreatePatientAdmissionDto {
     dischargeDate: moment.Moment | undefined;
     diagnosis: string | undefined;
     status: AdmissionStatus;
-}
-
-export class CreatePatientsDto implements ICreatePatientsDto {
-    patientCode: string | undefined;
-    firstName: string | undefined;
-    lastName: string | undefined;
-    dateOfBirth: moment.Moment;
-    gender: PatientEnum;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    address: string | undefined;
-    createdAt: moment.Moment;
-
-    constructor(data?: ICreatePatientsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.patientCode = _data["patientCode"];
-            this.firstName = _data["firstName"];
-            this.lastName = _data["lastName"];
-            this.dateOfBirth = _data["dateOfBirth"] ? moment(_data["dateOfBirth"].toString()) : <any>undefined;
-            this.gender = _data["gender"];
-            this.phoneNumber = _data["phoneNumber"];
-            this.email = _data["email"];
-            this.address = _data["address"];
-            this.createdAt = _data["createdAt"] ? moment(_data["createdAt"].toString()) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): CreatePatientsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new CreatePatientsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["patientCode"] = this.patientCode;
-        data["firstName"] = this.firstName;
-        data["lastName"] = this.lastName;
-        data["dateOfBirth"] = this.dateOfBirth ? this.dateOfBirth.toISOString() : <any>undefined;
-        data["gender"] = this.gender;
-        data["phoneNumber"] = this.phoneNumber;
-        data["email"] = this.email;
-        data["address"] = this.address;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        return data;
-    }
-
-    clone(): CreatePatientsDto {
-        const json = this.toJSON();
-        let result = new CreatePatientsDto();
-        result.init(json);
-        return result;
-    }
-}
-
-export interface ICreatePatientsDto {
-    patientCode: string | undefined;
-    firstName: string | undefined;
-    lastName: string | undefined;
-    dateOfBirth: moment.Moment;
-    gender: PatientEnum;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    address: string | undefined;
-    createdAt: moment.Moment;
 }
 
 export class CreateRoleDto implements ICreateRoleDto {
@@ -4255,6 +4401,8 @@ export class DoctorsDto implements IDoctorsDto {
     phoneNumber: string | undefined;
     email: string | undefined;
     isAvailable: boolean;
+    photo1Path: string | undefined;
+    photo2Path: string | undefined;
 
     constructor(data?: IDoctorsDto) {
         if (data) {
@@ -4274,6 +4422,8 @@ export class DoctorsDto implements IDoctorsDto {
             this.phoneNumber = _data["phoneNumber"];
             this.email = _data["email"];
             this.isAvailable = _data["isAvailable"];
+            this.photo1Path = _data["photo1Path"];
+            this.photo2Path = _data["photo2Path"];
         }
     }
 
@@ -4293,6 +4443,8 @@ export class DoctorsDto implements IDoctorsDto {
         data["phoneNumber"] = this.phoneNumber;
         data["email"] = this.email;
         data["isAvailable"] = this.isAvailable;
+        data["photo1Path"] = this.photo1Path;
+        data["photo2Path"] = this.photo2Path;
         return data;
     }
 
@@ -4312,6 +4464,8 @@ export interface IDoctorsDto {
     phoneNumber: string | undefined;
     email: string | undefined;
     isAvailable: boolean;
+    photo1Path: string | undefined;
+    photo2Path: string | undefined;
 }
 
 export class FlatPermissionDto implements IFlatPermissionDto {
@@ -4767,6 +4921,9 @@ export class PatientsDto implements IPatientsDto {
     email: string | undefined;
     address: string | undefined;
     createdAt: moment.Moment;
+    photoPath: string | undefined;
+    readonly dateOfBirthString: string | undefined;
+    readonly createdAtString: string | undefined;
 
     constructor(data?: IPatientsDto) {
         if (data) {
@@ -4789,6 +4946,9 @@ export class PatientsDto implements IPatientsDto {
             this.email = _data["email"];
             this.address = _data["address"];
             this.createdAt = _data["createdAt"] ? moment(_data["createdAt"].toString()) : <any>undefined;
+            this.photoPath = _data["photoPath"];
+            (<any>this).dateOfBirthString = _data["dateOfBirthString"];
+            (<any>this).createdAtString = _data["createdAtString"];
         }
     }
 
@@ -4811,6 +4971,9 @@ export class PatientsDto implements IPatientsDto {
         data["email"] = this.email;
         data["address"] = this.address;
         data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["photoPath"] = this.photoPath;
+        data["dateOfBirthString"] = this.dateOfBirthString;
+        data["createdAtString"] = this.createdAtString;
         return data;
     }
 
@@ -4833,6 +4996,9 @@ export interface IPatientsDto {
     email: string | undefined;
     address: string | undefined;
     createdAt: moment.Moment;
+    photoPath: string | undefined;
+    dateOfBirthString: string | undefined;
+    createdAtString: string | undefined;
 }
 
 export class PermissionDto implements IPermissionDto {
@@ -5729,73 +5895,6 @@ export interface IUpdateBedDto {
     isOccupied: boolean;
 }
 
-export class UpdateDoctorsDto implements IUpdateDoctorsDto {
-    id: number;
-    doctorCode: string | undefined;
-    fullName: string | undefined;
-    qualification: string | undefined;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    isAvailable: boolean;
-
-    constructor(data?: IUpdateDoctorsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.doctorCode = _data["doctorCode"];
-            this.fullName = _data["fullName"];
-            this.qualification = _data["qualification"];
-            this.phoneNumber = _data["phoneNumber"];
-            this.email = _data["email"];
-            this.isAvailable = _data["isAvailable"];
-        }
-    }
-
-    static fromJS(data: any): UpdateDoctorsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdateDoctorsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["doctorCode"] = this.doctorCode;
-        data["fullName"] = this.fullName;
-        data["qualification"] = this.qualification;
-        data["phoneNumber"] = this.phoneNumber;
-        data["email"] = this.email;
-        data["isAvailable"] = this.isAvailable;
-        return data;
-    }
-
-    clone(): UpdateDoctorsDto {
-        const json = this.toJSON();
-        let result = new UpdateDoctorsDto();
-        result.init(json);
-        return result;
-    }
-}
-
-export interface IUpdateDoctorsDto {
-    id: number;
-    doctorCode: string | undefined;
-    fullName: string | undefined;
-    qualification: string | undefined;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    isAvailable: boolean;
-}
-
 export class UpdatePatientAdmissionDto implements IUpdatePatientAdmissionDto {
     id: number;
     patientId: number;
@@ -5865,85 +5964,6 @@ export interface IUpdatePatientAdmissionDto {
     dischargeDate: moment.Moment | undefined;
     diagnosis: string | undefined;
     status: AdmissionStatus;
-}
-
-export class UpdatePatientsDto implements IUpdatePatientsDto {
-    id: number;
-    patientCode: string | undefined;
-    firstName: string | undefined;
-    lastName: string | undefined;
-    dateOfBirth: moment.Moment;
-    gender: PatientEnum;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    address: string | undefined;
-    createdAt: moment.Moment;
-
-    constructor(data?: IUpdatePatientsDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.patientCode = _data["patientCode"];
-            this.firstName = _data["firstName"];
-            this.lastName = _data["lastName"];
-            this.dateOfBirth = _data["dateOfBirth"] ? moment(_data["dateOfBirth"].toString()) : <any>undefined;
-            this.gender = _data["gender"];
-            this.phoneNumber = _data["phoneNumber"];
-            this.email = _data["email"];
-            this.address = _data["address"];
-            this.createdAt = _data["createdAt"] ? moment(_data["createdAt"].toString()) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): UpdatePatientsDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new UpdatePatientsDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["patientCode"] = this.patientCode;
-        data["firstName"] = this.firstName;
-        data["lastName"] = this.lastName;
-        data["dateOfBirth"] = this.dateOfBirth ? this.dateOfBirth.toISOString() : <any>undefined;
-        data["gender"] = this.gender;
-        data["phoneNumber"] = this.phoneNumber;
-        data["email"] = this.email;
-        data["address"] = this.address;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        return data;
-    }
-
-    clone(): UpdatePatientsDto {
-        const json = this.toJSON();
-        let result = new UpdatePatientsDto();
-        result.init(json);
-        return result;
-    }
-}
-
-export interface IUpdatePatientsDto {
-    id: number;
-    patientCode: string | undefined;
-    firstName: string | undefined;
-    lastName: string | undefined;
-    dateOfBirth: moment.Moment;
-    gender: PatientEnum;
-    phoneNumber: string | undefined;
-    email: string | undefined;
-    address: string | undefined;
-    createdAt: moment.Moment;
 }
 
 export class UpdateRoomDto implements IUpdateRoomDto {
@@ -6204,6 +6224,11 @@ export interface IUserLoginInfoDto {
     surname: string | undefined;
     userName: string | undefined;
     emailAddress: string | undefined;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export class ApiException extends Error {

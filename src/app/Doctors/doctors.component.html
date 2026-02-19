@@ -31,6 +31,11 @@
             <th>{{ 'Qualification' | localize }}</th>
             <th>{{ 'Phone' | localize }}</th>
             <th>{{ 'Email' | localize }}</th>
+
+            <!-- ✅ ADDED PHOTO COLUMNS -->
+            <th>Photo 1</th>
+            <th>Photo 2</th>
+
             <th>{{ 'Available' | localize }}</th>
             <th width="180">{{ 'Actions' | localize }}</th>
           </tr>
@@ -41,14 +46,34 @@
           <tr *ngFor="let d of doctors; let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ d.doctorCode }}</td>
-            <td>{{ d.fullName }}</td>
+            <td>Dr.{{ d.fullName }}</td>
             <td>{{ d.qualification }}</td>
             <td>{{ d.phoneNumber }}</td>
             <td>{{ d.email }}</td>
+
+            <!-- ✅ PHOTO 1 -->
+            <td class="text-center">
+              <img *ngIf="d.photo1Path"
+                   [src]="getPhotoUrl(d.photo1Path)"
+                   width="55"
+                   height="55"
+                   style="object-fit:cover;border-radius:6px;">
+            </td>
+
+            <!-- ✅ PHOTO 2 -->
+            <td class="text-center">
+              <img *ngIf="d.photo2Path"
+                   [src]="getPhotoUrl(d.photo2Path)"
+                   width="55"
+                   height="55"
+                   style="object-fit:cover;border-radius:6px;">
+            </td>
+
             <td>
               <span class="badge badge-success" *ngIf="d.isAvailable">Available</span>
               <span class="badge badge-danger" *ngIf="!d.isAvailable">Not Available</span>
             </td>
+
             <td class="text-center">
               <button class="btn btn-sm btn-info mr-1" (click)="editDoctor(d)">
                 {{ 'Edit' | localize }}
@@ -62,7 +87,7 @@
 
           <!-- No Data -->
           <tr *ngIf="doctors?.length === 0">
-            <td colspan="8" class="text-center text-muted">
+            <td colspan="10" class="text-center text-muted">
               {{ 'No data found' | localize }}
             </td>
           </tr>

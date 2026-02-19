@@ -1,4 +1,4 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,6 @@ import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-mo
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
-import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   templateUrl: './edit.component.html',
@@ -33,42 +32,40 @@ export class EditBedComponent extends AppComponentBase implements OnInit {
 
   saving = false;
   rooms: RoomDto[] = [];
-
-  
   id!: number;
 
-  bed: any = {
-    id: null,
-    roomId: null,
-    bedNumber: '',
-    isOccupied: false
-  };
+  bed: UpdateBedDto = new UpdateBedDto(); // Use DTO
 
   constructor(
     injector: Injector,
     private _bedService: BedServiceProxy,
     private _roomService: RoomServiceProxy,
     public bsModalRef: BsModalRef,
-     private cdr: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef
   ) {
     super(injector);
   }
 
   ngOnInit(): void {
     this.loadRooms();
-    this.loadBed();
+
+    if (this.id) {
+      this.loadBed();
+    }
   }
 
-loadRooms(): void {
-  this._roomService.getAllRooms().subscribe((res: RoomDto[]) => {
-    this.rooms = res;
-    this.cdr.detectChanges();
-  });
-}
+  loadRooms(): void {
+    this._roomService.getAllRooms().subscribe((res: RoomDto[]) => {
+      this.rooms = res;
+      this.cdr.detectChanges();
+    });
+  }
 
   loadBed(): void {
-    this._bedService.getAll().subscribe(res => {
-      this.bed = res;
+    // Fetch a single bed by ID
+    this._bedService.getById(this.id).subscribe(res => {
+      this.bed.init(res); // initialize DTO
+      this.cdr.detectChanges();
     });
   }
 

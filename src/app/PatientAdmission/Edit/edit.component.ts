@@ -1,13 +1,14 @@
+import { Component, Injector, OnInit, EventEmitter, Output, Input, ChangeDetectorRef } from '@angular/core';
+import { BsModalRef } from 'ngx-bootstrap/modal';
+import { AppComponentBase } from '../../../shared/app-component-base';
+import { PatientAdmissionDto, PatientAdmissionServiceProxy, NameValueDto } from '../../../shared/service-proxies/service-proxies';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Injector, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-modal-header.component';
+import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
-import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
-import { AppComponentBase } from '../../../shared/app-component-base';
-import { CreatePatientAdmissionDto, NameValueDto, PatientAdmissionDto, PatientAdmissionServiceProxy } from '../../../shared/service-proxies/service-proxies';
-import { BsModalRef } from 'ngx-bootstrap/modal';
+import moment, { Moment } from 'moment';
 
 @Component({
   templateUrl: './edit.component.html',
@@ -15,33 +16,28 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
   imports: [
     CommonModule,
     FormsModule,
-    AbpValidationSummaryComponent,
-    AbpModalFooterComponent,
     AbpModalHeaderComponent,
+    AbpModalFooterComponent,
+    AbpValidationSummaryComponent,
     LocalizePipe
-],
+  ]
 })
-export class CreatePatientAdmissionComponent extends AppComponentBase implements OnInit {
-
-  [x: string]: any;
-
-  successMessage: string = '';
-  errorMessage: string = '';
+export class EditPatientAdmissionComponent extends AppComponentBase implements OnInit {
 
   saving = false;
 
-  Pa: PatientAdmissionDto = new PatientAdmissionDto();
+  @Input() id!: number;
+  patientAdmission: PatientAdmissionDto = new PatientAdmissionDto();
 
   patientList: NameValueDto[] = [];
   doctorList: NameValueDto[] = [];
   bedList: NameValueDto[] = [];
-  roomList: NameValueDto[] = [];
 
-  @Output() onSave: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onSave = new EventEmitter<any>();
 
   constructor(
     injector: Injector,
-    private _pa: PatientAdmissionServiceProxy,
+    private _paService: PatientAdmissionServiceProxy,
     public bsModalRef: BsModalRef,
     private cd: ChangeDetectorRef
   ) {
@@ -49,60 +45,62 @@ export class CreatePatientAdmissionComponent extends AppComponentBase implements
   }
 
   ngOnInit(): void {
-    this.loadPatients();
-    this.loadDoctors();
-    this.loadBeds(); // optional roomId if method adjusted
+    this.loadLookups();
+    if (this.id) {
+      this.loadPatientAdmission();
+    }
   }
 
-  loadPatients(): void {
-    this._pa.getPatientLookup().subscribe(result => {
-      this.patientList = result;
-      this.cd.detectChanges();
-      console.log('Loaded Patients:', this.patientList);
-    });
+  loadLookups(): void {
+    this._paService.getPatientLookup().subscribe(res => { this.patientList = res; this.cd.detectChanges(); });
+    this._paService.getDoctorLookup().subscribe(res => { this.doctorList = res; this.cd.detectChanges(); });
+    this._paService.getBedLookup().subscribe(res => { this.bedList = res; this.cd.detectChanges(); });
   }
 
-  loadDoctors(): void {
-    this._pa.getDoctorLookup().subscribe(result => {
-      this.doctorList = result;
-      this.cd.detectChanges();
-      console.log('Loaded Doctors:', this.doctorList);
-    });
+loadPatientAdmission(): void {
+  this._paService.get(this.id).subscribe(res => {
+    this.patientAdmission = new PatientAdmissionDto();
+    this.patientAdmission.init(res); // populate DTO
+
+    // Convert date strings to Moment objects
+    this.patientAdmission.admissionDate = res.admissionDate ? moment(res.admissionDate) : null;
+    this.patientAdmission.dischargeDate = res.dischargeDate ? moment(res.dischargeDate) : null;
+
+    this.cd.detectChanges(); // update template safely
+  });
+}
+
+
+  /** Getters for template binding */
+  get admissionDateStr(): string {
+    return this.patientAdmission.admissionDate ? this.patientAdmission.admissionDate.format('YYYY-MM-DD') : '';
   }
 
-  loadBeds(): void {
-    this._pa.getBedLookup().subscribe(result => {
-      this.bedList = result;
-      this.cd.detectChanges();
-      console.log('Loaded Beds:', this.bedList);
-    });
+  get dischargeDateStr(): string {
+    return this.patientAdmission.dischargeDate ? this.patientAdmission.dischargeDate.format('YYYY-MM-DD') : '';
+  }
+
+  /** Update Moment object when user changes input */
+  setAdmissionDate(value: string) {
+    this.patientAdmission.admissionDate = value ? moment(value, 'YYYY-MM-DD') : null;
+  }
+
+  setDischargeDate(value: string) {
+    this.patientAdmission.dischargeDate = value ? moment(value, 'YYYY-MM-DD') : null;
   }
 
   save(): void {
     this.saving = true;
-    const input: CreatePatientAdmissionDto = {
-        ...this.Pa,
-        init: function (_data?: any): void {
-            throw new Error('Function not implemented.');
-        },
-        toJSON: function (data?: any) {
-            throw new Error('Function not implemented.');
-        },
-        clone: function (): CreatePatientAdmissionDto {
-            throw new Error('Function not implemented.');
-        }
-    };
-
-    this._pa.create(input).subscribe({
+    this._paService.update(this.patientAdmission).subscribe({
       next: () => {
         this.saving = false;
-        this.notify.success(`${this.Pa.firstName}, created successfully ✅`, 'Success');
+        this.notify.success('Patient admission updated successfully ✅', 'Success');
         this.onSave.emit(null);
         setTimeout(() => this.bsModalRef.hide(), 1200);
       },
       error: (err) => {
         this.saving = false;
-        const errorMsg = err?.error?.error?.message || 'Email already exists ❌';
+        const errorMsg = err?.error?.error?.message || 'Error while updating ❌';
         this.notify.error(errorMsg, 'Error');
         this.cd.detectChanges();
       }

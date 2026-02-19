@@ -1,78 +1,96 @@
-import { Component, Injector, OnInit, EventEmitter, output, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  Injector,
+  EventEmitter,
+  Output
+} from '@angular/core';
 
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { AppComponentBase } from '../../../shared/app-component-base';
-import { CreateDoctorsDto, DoctorsServiceProxy } from '../../../shared/service-proxies/service-proxies';
-
-import { AbpValidationSummaryComponent } from "../../../shared/components/validation/abp-validation.summary.component";
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AbpModalFooterComponent } from "../../../shared/components/modal/abp-modal-footer.component";
-import { AbpModalHeaderComponent } from "../../../shared/components/modal/abp-modal-header.component";
-import { LocalizePipe } from "../../../shared/pipes/localize.pipe";
-
+import {
+  DoctorsServiceProxy,
+  FileParameter
+} from '../../../shared/service-proxies/service-proxies';
+import { AbpModalFooterComponent } from "@shared/components/modal/abp-modal-footer.component";
+import { SharedModule } from "@shared/shared.module";
 
 @Component({
   selector: 'app-create-doctor',
   templateUrl: './create-doctor.component.html',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    AbpModalFooterComponent,
-    AbpValidationSummaryComponent,
-    AbpModalHeaderComponent,
-    LocalizePipe
-]
+  imports: [AbpModalFooterComponent, SharedModule]
 })
-export class CreateDoctorComponent extends AppComponentBase implements OnInit {
+export class CreateDoctorComponent extends AppComponentBase {
 
+  saving = false;
 
-saving = false;
-doctor = new CreateDoctorsDto();
-successMessage: string = '';
-errorMessage: string = '';
+  doctor: any = {
+    doctorCode: '',
+    fullName: '',
+    qualification: '',
+    phoneNumber: '',
+    email: '',
+    isAvailable: true
+  };
 
+  photo1?: File;
+  photo2?: File;
 
-onSave = output<EventEmitter<any>>();
+  @Output() onSave = new EventEmitter<any>();
 
+  constructor(
+    injector: Injector,
+    private _doctorsService: DoctorsServiceProxy,
+    public bsModalRef: BsModalRef
+  ) {
+    super(injector);
+  }
 
-constructor(
-injector: Injector,
-private _doctorsService: DoctorsServiceProxy,
-public bsModalRef: BsModalRef,
-private cd: ChangeDetectorRef
-) {
-super(injector);
-}
+  onPhoto1Selected(e: any) {
+    this.photo1 = e.target.files[0];
+  }
 
+  onPhoto2Selected(e: any) {
+    this.photo2 = e.target.files[0];
+  }
 
-ngOnInit(): void {}
+  save() {
 
+    if (this.saving) return;
+    this.saving = true;
 
-save(): void {
-this.saving = true;
+    // ⭐ Convert File → FileParameter
+    const photo1Param: FileParameter | undefined = this.photo1
+      ? { data: this.photo1, fileName: this.photo1.name }
+      : undefined;
 
+    const photo2Param: FileParameter | undefined = this.photo2
+      ? { data: this.photo2, fileName: this.photo2.name }
+      : undefined;
 
-this._doctorsService.createDoctor(this.doctor).subscribe(() => {
-this.notify.success('Doctor created successfully');
-this.onSave.emit(null);
-this.bsModalRef.hide();
-
-
-error: (err) => {
-        this.saving = false;
-
-        const errorMsg =
-          err?.error?.error?.message || 'Patient code already exists ';
-          err?.error?.error?.message || 'Email is already associated with another patient';
-          
-
-      
-        this.notify.error(errorMsg, 'Error');
-
-        this.cd.detectChanges();
-      }
-});
-}
+    this._doctorsService
+      .createDoctor(
+        this.doctor.doctorCode,
+        this.doctor.fullName,
+        this.doctor.qualification,
+        this.doctor.phoneNumber,
+        this.doctor.email,
+        this.doctor.isAvailable,
+        photo1Param,
+        photo2Param
+      )
+      .subscribe({
+        next: () => {
+          this.notify.success('Doctor created successfully');
+          this.bsModalRef.hide();
+          this.onSave.emit(null);
+        },
+        error: () => {
+          this.notify.error('Error creating doctor');
+        },
+        complete: () => {
+          this.saving = false;
+        }
+      });
+  }
 }

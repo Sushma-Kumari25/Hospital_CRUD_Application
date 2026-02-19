@@ -16,7 +16,7 @@ export class AppComponent extends AppComponentBase implements OnInit {
     sidebarExpanded: boolean;
 
     constructor(
-        injector: Injector,
+        private  injector: Injector,
         private renderer: Renderer2,
         private _layoutStore: LayoutStoreService
     ) {

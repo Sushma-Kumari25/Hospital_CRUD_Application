@@ -11,7 +11,7 @@ import { getCurrentLanguage } from './root.module';
 
 import 'moment/min/locales.min';
 import 'moment-timezone';
-import { provideClientHydration, BrowserModule, bootstrapApplication } from '@angular/platform-browser';
+import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
 import { AbpHttpInterceptor } from 'abp-ng2-module';
 import { AppInitializer } from './app-initializer';
@@ -47,7 +47,7 @@ const bootstrap = () => {
                 RootRoutingModule
             ),
             provideExperimentalZonelessChangeDetection(),
-            provideClientHydration(),
+            // provideClientHydration(),
             { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },
             {
                 provide: APP_INITIALIZER,

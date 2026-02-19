@@ -71,12 +71,12 @@ loadRooms(): void {
 
     this._bedService.create(input).subscribe({
       next: () => {
-        this.notify.success('Bed created successfully ✅');
+        this.notify.success('Bed created successfully ');
         this.bsModalRef.hide();
         this.saving = false;
       },
       error: () => {
-        this.notify.error('Error while creating bed ❌');
+        this.notify.error('Error while creating bed ');
         this.saving = false;
       }
     });

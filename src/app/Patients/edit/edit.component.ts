@@ -3,7 +3,7 @@ import {
   Injector,
   OnInit,
   ChangeDetectorRef,
-  output,
+  Output,
   EventEmitter
 } from '@angular/core';
 
@@ -17,10 +17,9 @@ import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-mo
 import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
 
 import { AppComponentBase } from '../../../shared/app-component-base';
-import { PatientsServiceProxy, UpdatePatientsDto } from '../../../shared/service-proxies/service-proxies';
+import { PatientsServiceProxy } from '../../../shared/service-proxies/service-proxies';
 import moment from 'moment';
-
-
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   templateUrl: 'edit.component.html',
@@ -34,29 +33,30 @@ import moment from 'moment';
     LocalizePipe
   ]
 })
-export class EditPatientComponent
-  extends AppComponentBase
-  implements OnInit {
+export class EditPatientComponent extends AppComponentBase implements OnInit {
 
   saving = false;
-
   id!: number;
 
-  // form model
-  patient: UpdatePatientsDto = new UpdatePatientsDto();
+  patient: any = {id: 0,
+  patientCode: '',
+  firstName: '',
+  lastName: '',
+  gender: 0};
 
-  // event for parent refresh
-  onSave = output<EventEmitter<any>>();
+  @Output() onSave = new EventEmitter<any>();
 
-   // Photo file
   selectedFile?: File;
   existingPhotoPath?: string;
+
+  dateOfBirthString = '';
 
   constructor(
     injector: Injector,
     private _patientsService: PatientsServiceProxy,
     public bsModalRef: BsModalRef,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private http: HttpClient
   ) {
     super(injector);
   }
@@ -67,68 +67,93 @@ export class EditPatientComponent
     }
   }
 
-  loadPatient(): void {
-    this._patientsService.getPatientById(this.id).subscribe(result => {
-      this.patient.init(result);
+  // ================= LOAD =================
+ loadPatient(): void {
+
+  this._patientsService.getPatientById(this.id)
+    .subscribe(result => {
+
+      // ⭐ NEW OBJECT ASSIGN
+      this.patient = { ...result };
+
+      if (result.dateOfBirth) {
+        this.dateOfBirthString =
+          moment(result.dateOfBirth).format('YYYY-MM-DD');
+      }
+
+      if (result.photoPath) {
+        const baseUrl = 'https://localhost:44311';
+        this.existingPhotoPath =
+          result.photoPath.startsWith('http')
+            ? result.photoPath
+            : baseUrl + (result.photoPath.startsWith('/') ? result.photoPath : '/' + result.photoPath);
+      }
+
+      // ⭐ FORCE CHANGE DETECT
       this.cd.detectChanges();
+
     });
-  }
- // Handle file selection
+}
+
+
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
   }
-  // ---------- Update ----------
+
+  // ================= SAVE =================
   save(): void {
+
     this.saving = true;
 
-      if (this.patient.dateOfBirth) {
-        this.patient.dateOfBirth = moment(this.patient.dateOfBirth);
-      }
-let payload: any;
+    const formData = new FormData();
+
+    formData.append('Id', this.patient.id.toString());
+    formData.append('PatientCode', this.patient.patientCode);
+    formData.append('FirstName', this.patient.firstName);
+    formData.append('LastName', this.patient.lastName);
+    formData.append(
+      'DateOfBirth',
+      moment(this.dateOfBirthString).format('YYYY-MM-DD')
+    );
+    formData.append('Gender', this.patient.gender?.toString() || '');
+    formData.append('PhoneNumber', this.patient.phoneNumber || '');
+    formData.append('Email', this.patient.email || '');
+    formData.append('Address', this.patient.address || '');
+
     if (this.selectedFile) {
-      payload = new FormData();
-      payload.append('Id', this.patient.id.toString());
-      payload.append('PatientCode', this.patient.patientCode);
-      payload.append('FirstName', this.patient.firstName);
-      payload.append('LastName', this.patient.lastName);
-      payload.append('DateOfBirth', this.patient.dateOfBirth.toISOString());
-      payload.append('Gender', this.patient.gender.toString());
-      payload.append('PhoneNumber', this.patient.phoneNumber);
-      payload.append('Email', this.patient.email);
-      payload.append('Address', this.patient.address || '');
-      payload.append('Photo', this.selectedFile, this.selectedFile.name);
-    } else {
-      payload = this.patient;
+      formData.append('Photo', this.selectedFile, this.selectedFile.name);
     }
-    this._patientsService.updatePatient(this.patient).subscribe({
-      next: () => {
-        this.saving = false;
 
-        // Success popup
-        this.notify.success(
-          `${this.patient.firstName} ${this.patient.lastName} updated successfully ✅`,
-          'Success'
-        );
+    this.http.post('/api/services/app/Patients/UpdatePatient', formData)
+      .subscribe({
+        next: () => {
 
-        // refresh list
-        this.onSave.emit(null);
+          
+          setTimeout(() => {
 
-        // close modal
-        setTimeout(() => {
-          this.bsModalRef.hide();
-        }, 1200);
-      },
+            this.saving = false;
 
-      error: (err) => {
-        this.saving = false;
+            this.notify.success(
+              `${this.patient.firstName} ${this.patient.lastName} updated successfully`,
+              'Success'
+            );
 
-        // backend error message
-        const errorMsg =
-          err?.error?.error?.message || 'Update failed ❌';
+            this.onSave.emit(null);
 
-        this.notify.error(errorMsg, 'Error');
-        this.cd.detectChanges();
-      }
-    });
+            this.bsModalRef.hide();
+
+          });
+
+        },
+        error: (err) => {
+
+          setTimeout(() => {
+            this.saving = false;
+            const msg = err?.error?.error?.message || 'Update failed';
+            this.notify.error(msg, 'Error');
+          });
+
+        }
+      });
   }
 }

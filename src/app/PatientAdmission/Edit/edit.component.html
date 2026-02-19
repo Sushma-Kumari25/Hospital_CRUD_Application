@@ -1,47 +1,52 @@
 <form
   class="form-horizontal"
   autocomplete="off"
-  #editPatientAdmissionForm="ngForm"
+  #editPatientForm="ngForm"
+  *ngIf="patientAdmission"
   (ngSubmit)="save()">
+
 
   <abp-modal-header
     [title]="'Edit Patient Admission' | localize"
     (onCloseClick)="bsModalRef.hide()">
   </abp-modal-header>
 
+
   <div class="modal-body">
 
-    <!-- Patient Dropdown -->
+    
     <div class="form-group row required">
       <label class="col-md-3 col-form-label">Patient</label>
       <div class="col-md-9">
-        <select class="form-control"
-                name="patientId"
-                required
-                [(ngModel)]="patientAdmission.patientId"
-                #patientModel="ngModel"
-                #patientEl>
-          <option value="">-- Select Patient --</option>
-          <option *ngFor="let patient of patients" [value]="patient.id">
-            {{ patient.patientCode }} - {{ patient.firstName }} {{ patient.lastName }}
+        <select
+          class="form-control"
+          name="patientId"
+          required
+          [(ngModel)]="patientAdmission.patientId"
+          #patientModel="ngModel"
+          #patientEl>
+          <option [ngValue]="null">-- Select Patient --</option>
+          <option *ngFor="let patient of patientList" [ngValue]="patient.id">
+            {{ patient.name }}
           </option>
         </select>
         <abp-validation-summary [control]="patientModel" [controlEl]="patientEl"></abp-validation-summary>
       </div>
     </div>
 
-    <!-- Doctor Dropdown -->
+
     <div class="form-group row required">
       <label class="col-md-3 col-form-label">Doctor</label>
       <div class="col-md-9">
-        <select class="form-control"
-                name="doctorId"
-                required
-                [(ngModel)]="patientAdmission.doctorId"
-                #doctorModel="ngModel"
-                #doctorEl>
-          <option value="">-- Select Doctor --</option>
-          <option *ngFor="let doctor of doctors" [value]="doctor.id">
+        <select
+          class="form-control"
+          name="doctorId"
+          required
+          [(ngModel)]="patientAdmission.doctorId"
+          #doctorModel="ngModel"
+          #doctorEl>
+          <option [ngValue]="null">-- Select Doctor --</option>
+          <option *ngFor="let doctor of doctorList" [ngValue]="doctor.id">
             {{ doctor.name }}
           </option>
         </select>
@@ -49,18 +54,19 @@
       </div>
     </div>
 
-    <!-- Bed Dropdown -->
+
     <div class="form-group row required">
       <label class="col-md-3 col-form-label">Bed</label>
       <div class="col-md-9">
-        <select class="form-control"
-                name="bedId"
-                required
-                [(ngModel)]="patientAdmission.bedId"
-                #bedModel="ngModel"
-                #bedEl>
-          <option value="">-- Select Bed --</option>
-          <option *ngFor="let bed of beds" [value]="bed.id">
+        <select
+          class="form-control"
+          name="bedId"
+          required
+          [(ngModel)]="patientAdmission.bedId"
+          #bedModel="ngModel"
+          #bedEl>
+          <option [ngValue]="null">-- Select Bed --</option>
+          <option *ngFor="let bed of bedList" [ngValue]="bed.id">
             {{ bed.bedNumber }} - {{ bed.roomNumber }}
           </option>
         </select>
@@ -68,61 +74,68 @@
       </div>
     </div>
 
-    <!-- Admission Date -->
-    <div class="form-group row required">
-      <label class="col-md-3 col-form-label">Admission Date</label>
-      <div class="col-md-9">
-        <input type="date"
-               class="form-control"
-               name="admissionDate"
-               required
-               [(ngModel)]="patientAdmission.admissionDate"
-               #admissionDateModel="ngModel"
-               #admissionDateEl>
-        <abp-validation-summary [control]="admissionDateModel" [controlEl]="admissionDateEl"></abp-validation-summary>
-      </div>
-    </div>
+<div class="form-group row required">
+  <label class="col-md-3 col-form-label">Admission Date</label>
+  <div class="col-md-9">
+    <input
+      type="date"
+      class="form-control"
+      name="admissionDate"
+      required
+      [ngModel]="admissionDateStr"
+      (ngModelChange)="setAdmissionDate($event)"
+      #admissionDateModel="ngModel"
+      #admissionDateEl />
+    <abp-validation-summary [control]="admissionDateModel" [controlEl]="admissionDateEl"></abp-validation-summary>
+  </div>
+</div>
 
-    <!-- Discharge Date -->
-    <div class="form-group row">
-      <label class="col-md-3 col-form-label">Discharge Date</label>
-      <div class="col-md-9">
-        <input type="date"
-               class="form-control"
-               name="dischargeDate"
-               [(ngModel)]="patientAdmission.dischargeDate"
-               #dischargeDateModel="ngModel"
-               #dischargeDateEl>
-        <abp-validation-summary [control]="dischargeDateModel" [controlEl]="dischargeDateEl"></abp-validation-summary>
-      </div>
-    </div>
 
-    <!-- Diagnosis -->
+<div class="form-group row">
+  <label class="col-md-3 col-form-label">Discharge Date</label>
+  <div class="col-md-9">
+    <input
+      type="date"
+      class="form-control"
+      name="dischargeDate"
+      [ngModel]="dischargeDateStr"
+      (ngModelChange)="setDischargeDate($event)"
+      #dischargeDateModel="ngModel"
+      #dischargeDateEl />
+    <abp-validation-summary [control]="dischargeDateModel" [controlEl]="dischargeDateEl"></abp-validation-summary>
+  </div>
+</div>
+
+
     <div class="form-group row required">
       <label class="col-md-3 col-form-label">Diagnosis</label>
       <div class="col-md-9">
-        <textarea class="form-control"
-                  name="diagnosis"
-                  rows="3"
-                  placeholder="Enter Diagnosis --"
-                  [(ngModel)]="patientAdmission.diagnosis">
+        <textarea
+          class="form-control"
+          name="diagnosis"
+          rows="3"
+          required
+          [(ngModel)]="patientAdmission.diagnosis"
+          #diagnosisModel="ngModel"
+          #diagnosisEl>
         </textarea>
+        <abp-validation-summary [control]="diagnosisModel" [controlEl]="diagnosisEl"></abp-validation-summary>
       </div>
     </div>
 
-    <!-- Status -->
     <div class="form-group row required">
       <label class="col-md-3 col-form-label">Status</label>
       <div class="col-md-9">
-        <select class="form-control"
-                name="status"
-                required
-                [(ngModel)]="patientAdmission.status"
-                #statusModel="ngModel"
-                #statusEl>
-          <option value="">-- Select Status --</option>
-          <option [value]="1">Admitted</option>
-          <option [value]="2">Discharged</option>
+        <select
+          class="form-control"
+          name="status"
+          required
+          [(ngModel)]="patientAdmission.status"
+          #statusModel="ngModel"
+          #statusEl>
+          <option [ngValue]="null">-- Select Status --</option>
+          <option [ngValue]="1">Admitted</option>
+          <option [ngValue]="2">Discharged</option>
         </select>
         <abp-validation-summary [control]="statusModel" [controlEl]="statusEl"></abp-validation-summary>
       </div>
@@ -130,11 +143,12 @@
 
   </div>
 
-  <!-- Modal Footer -->
+
   <abp-modal-footer
     [cancelDisabled]="saving"
-    [saveDisabled]="!editPatientAdmissionForm.form.valid || saving"
-    (onSaveClick)="save()"
+    [saveDisabled]="saving || !editPatientForm.form.valid"
     (onCancelClick)="bsModalRef.hide()">
   </abp-modal-footer>
+
 </form>
+<div>hello</div>

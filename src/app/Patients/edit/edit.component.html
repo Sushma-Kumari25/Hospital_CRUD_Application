@@ -1,10 +1,11 @@
 <form
+
   class="form-horizontal"
   autocomplete="off"
   #editPatientForm="ngForm"
   (ngSubmit)="save()">
-
-  <!-- Modal Header -->
+   
+  <!-- ===== Modal Header ===== -->
   <abp-modal-header
     [title]="'Edit Patient' | localize"
     (onCloseClick)="bsModalRef.hide()">
@@ -14,119 +15,85 @@
 
     <!-- Patient Code -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Patient Code
-      </label>
+      <label class="col-md-3 col-form-label">Patient Code</label>
       <div class="col-md-9">
-        <input
-          type="text"
+        <input type="text"
           class="form-control"
           name="patientCode"
           required
-          placeholder="Enter Patient Code --"
           minlength="3"
           maxlength="20"
           [(ngModel)]="patient.patientCode"
-          #codeModel="ngModel"
-          #codeEl />
+          #codeModel="ngModel" />
 
-        <abp-validation-summary
-          [control]="codeModel"
-          [controlEl]="codeEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="codeModel"></abp-validation-summary>
       </div>
     </div>
 
     <!-- First Name -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        First Name
-      </label>
+      <label class="col-md-3 col-form-label">First Name</label>
       <div class="col-md-9">
-        <input
-          type="text"
+        <input type="text"
           class="form-control"
           name="firstName"
           required
-          placeholder="Enter First Name --"
           minlength="2"
           maxlength="50"
           pattern="^[A-Z].*"
           [(ngModel)]="patient.firstName"
-          #fnameModel="ngModel"
-          #fnameEl />
+          #fnameModel="ngModel" />
 
-        <abp-validation-summary
-          [control]="fnameModel"
-          [controlEl]="fnameEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="fnameModel"></abp-validation-summary>
 
         <small class="text-danger"
           *ngIf="fnameModel.touched && fnameModel.errors?.['pattern']">
-          First letter capital hona chahiye (e.g. Ritesh)
+          First letter capital hona chahiye
         </small>
       </div>
     </div>
 
     <!-- Last Name -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Last Name
-      </label>
+      <label class="col-md-3 col-form-label">Last Name</label>
       <div class="col-md-9">
-        <input
-          type="text"
+        <input type="text"
           class="form-control"
           name="lastName"
           required
-          placeholder="Enter Last Name --"
           minlength="2"
           maxlength="50"
           [(ngModel)]="patient.lastName"
-          #lnameModel="ngModel"
-          #lnameEl />
+          #lnameModel="ngModel" />
 
-        <abp-validation-summary
-          [control]="lnameModel"
-          [controlEl]="lnameEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="lnameModel"></abp-validation-summary>
       </div>
     </div>
 
-    <!-- Date Of Birth -->
+    <!-- ⭐ DATE OF BIRTH FIX -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Date Of Birth
-      </label>
+      <label class="col-md-3 col-form-label">Date Of Birth</label>
       <div class="col-md-9">
-        <input
-          type="date"
+        <input type="date"
           class="form-control"
           name="dateOfBirth"
           required
-          [(ngModel)]="patient.dateOfBirth"
-          #dobModel="ngModel"
-          #dobEl />
+          [(ngModel)]="dateOfBirthString"
+          #dobModel="ngModel" />
 
-        <abp-validation-summary
-          [control]="dobModel"
-          [controlEl]="dobEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="dobModel"></abp-validation-summary>
       </div>
     </div>
 
     <!-- Gender -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Gender
-      </label>
+      <label class="col-md-3 col-form-label">Gender</label>
       <div class="col-md-9">
         <select class="form-control"
           name="gender"
           required
           [(ngModel)]="patient.gender"
-          #genderModel="ngModel"
-          #genderEl>
+          #genderModel="ngModel">
 
           <option value="">-- Select Gender --</option>
           <option [value]="5">Male</option>
@@ -134,34 +101,23 @@
           <option [value]="15">Other</option>
         </select>
 
-        <abp-validation-summary
-          [control]="genderModel"
-          [controlEl]="genderEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="genderModel"></abp-validation-summary>
       </div>
     </div>
 
     <!-- Phone -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Phone Number
-      </label>
+      <label class="col-md-3 col-form-label">Phone Number</label>
       <div class="col-md-9">
-        <input
-          type="text"
+        <input type="text"
           class="form-control"
           name="phoneNumber"
           required
-          placeholder="Enter Phone Number --"
           pattern="^[0-9]{10}$"
           [(ngModel)]="patient.phoneNumber"
-          #phoneModel="ngModel"
-          #phoneEl />
+          #phoneModel="ngModel" />
 
-        <abp-validation-summary
-          [control]="phoneModel"
-          [controlEl]="phoneEl">
-        </abp-validation-summary>
+        <abp-validation-summary [control]="phoneModel"></abp-validation-summary>
 
         <small class="text-danger"
           *ngIf="phoneModel.touched && phoneModel.errors?.['pattern']">
@@ -172,71 +128,69 @@
 
     <!-- Email -->
     <div class="form-group row required">
-      <label class="col-md-3 col-form-label">
-        Email
-      </label>
+      <label class="col-md-3 col-form-label">Email</label>
       <div class="col-md-9">
-        <input
-          type="email"
+        <input type="email"
           class="form-control"
           name="email"
           required
-          placeholder="Enter Email --"
           [(ngModel)]="patient.email"
-          #emailModel="ngModel"
-          #emailEl />
+          #emailModel="ngModel" />
 
         <small class="text-danger"
           *ngIf="emailModel?.touched && emailModel?.errors?.['required']">
-          Email is required 
+          Email is required
         </small>
 
         <small class="text-danger"
           *ngIf="emailModel?.touched && emailModel?.errors?.['email']">
-          Invalid email format 
+          Invalid email format
         </small>
       </div>
     </div>
 
     <!-- Address -->
     <div class="form-group row">
-      <label class="col-md-3 col-form-label">
-        Address
-      </label>
+      <label class="col-md-3 col-form-label">Address</label>
       <div class="col-md-9">
-        <textarea
-          class="form-control"
+        <textarea class="form-control"
           name="address"
           rows="3"
-          placeholder="Enter Address --"
           [(ngModel)]="patient.address">
         </textarea>
       </div>
     </div>
 
+    <!-- ⭐ PHOTO UPLOAD -->
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label">Photo</label>
+      <div class="col-md-9">
+        <input type="file"
+          class="form-control"
+          (change)="onFileSelected($event)"
+          accept="image/*" />
+
+        <small class="text-muted">
+          Upload new photo (jpg, png, max 2MB)
+        </small>
+
+        <!-- Existing Photo -->
+        <div *ngIf="existingPhotoPath" class="mt-2">
+          <label>Existing Photo:</label><br />
+          <img [src]="existingPhotoPath"
+            alt="Patient Photo"
+            class="img-thumbnail"
+            width="120" />
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Modal Footer -->
+  <!-- ===== Modal Footer ===== -->
   <abp-modal-footer
-    [cancelDisabled]="saving"
-    [saveDisabled]="!editPatientForm.form.valid || saving"
+       (onSaveClick)="save()"
     (onCancelClick)="bsModalRef.hide()">
   </abp-modal-footer>
-
-  <!-- Photo Upload -->
-<div class="form-group row">
-  <label class="col-md-3 col-form-label">Photo</label>
-  <div class="col-md-9">
-    <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" />
-    <small class="text-muted">Upload new photo (jpg, png, max 2MB)</small>
-
-    <div *ngIf="existingPhotoPath" class="mt-2">
-      <label>Existing Photo:</label>
-      <br/>
-      <img [src]="existingPhotoPath" alt="Patient Photo" class="img-thumbnail" width="100" />
-    </div>
-  </div>
-</div>
-
 
 </form>

@@ -16,7 +16,7 @@ export class HeaderLanguageMenuComponent extends AppComponentBase implements OnI
     currentLanguage: abp.localization.ILanguageInfo;
 
     constructor(
-        injector: Injector,
+        private injector: Injector,
         private _userService: UserServiceProxy
     ) {
         super(injector);

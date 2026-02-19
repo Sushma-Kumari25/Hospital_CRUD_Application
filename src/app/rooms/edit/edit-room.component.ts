@@ -1,12 +1,9 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { BsModalRef } from 'ngx-bootstrap/modal';
-
 import { AppComponentBase } from '../../../shared/app-component-base';
 import { RoomServiceProxy, UpdateRoomDto } from '../../../shared/service-proxies/service-proxies';
-
 import { AbpModalFooterComponent } from '../../../shared/components/modal/abp-modal-footer.component';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { AbpModalHeaderComponent } from '../../../shared/components/modal/abp-modal-header.component';
@@ -22,22 +19,19 @@ import { LocalizePipe } from '../../../shared/pipes/localize.pipe';
     AbpValidationSummaryComponent,
     AbpModalHeaderComponent,
     LocalizePipe
-]
+  ]
 })
 export class EditRoomComponent extends AppComponentBase implements OnInit {
 
   saving = false;
   id!: number;
+  room: UpdateRoomDto = new UpdateRoomDto();
 
-  room: any = {
-    roomNumber: '',
-    bedType: null,
-    isActive: false
-  };
+  @Output() onSave = new EventEmitter<any>(); // ✅ Add Output
 
   constructor(
     injector: Injector,
-    private _roomsService: RoomServiceProxy,
+    private _roomService: RoomServiceProxy,
     public bsModalRef: BsModalRef
   ) {
     super(injector);
@@ -49,16 +43,17 @@ export class EditRoomComponent extends AppComponentBase implements OnInit {
     }
   }
 
- loadRoom(): void {
-  this._roomsService.getRoomById(this.id).subscribe(res => {
-    this.room = {
-      roomNumber: res.roomNumber,
-      bedType: res.bedType,
-      isActive: res.isActive  
-    };
-  });
-}
-
+  loadRoom(): void {
+    this._roomService.getRoomById(this.id).subscribe(res => {
+      // ✅ Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.room.id = this.id;
+        this.room.roomNumber = res.roomNumber;
+        this.room.bedType = res.bedType;
+        this.room.isActive = res.isActive;
+      });
+    });
+  }
 
   save(): void {
     if (!this.room.roomNumber || !this.room.bedType) {
@@ -68,18 +63,15 @@ export class EditRoomComponent extends AppComponentBase implements OnInit {
 
     this.saving = true;
 
-    const input = new UpdateRoomDto();
-    input.id = this.id;
-    input.init(this.room);
-
-    this._roomsService.updateRoom(input).subscribe({
+    this._roomService.updateRoom(this.room).subscribe({
       next: () => {
-        this.notify.success('Room updated successfully ✅', 'Success');
+        this.notify.success('Room updated successfully', 'Success');
+        this.onSave.emit(null); // ✅ Emit event to parent
+        this.bsModalRef.hide();
         this.saving = false;
-        this.bsModalRef.hide();   // ✅ modal close
       },
       error: () => {
-        this.notify.error('Failed to update room ❌', 'Error');
+        this.notify.error('Failed to update room', 'Error');
         this.saving = false;
       }
     });
